@@ -1,5 +1,5 @@
 {
-    "name": "jaiwalker/GoogleAnalyticsphpwarpper",
+    "name": "jaiwalker/google-analyticsphpwarpper",
     "type": "Extension",
     "description": "A Nice Warpper to Google Analytics API Query ",
     "keywords": ["codeignite","Google Analytics","Extensions"],
