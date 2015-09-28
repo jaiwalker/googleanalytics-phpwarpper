@@ -6,9 +6,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Kora Jayaram",
-            "email": "kora.jayaram@gmail.com ",
-            "role": "Lead Developer"
+            "name": "kora jayaram",
+            "email":"kora.jayaram@gmail.com"
         }
     ],
     "require": {
