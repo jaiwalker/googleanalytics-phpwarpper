@@ -121,7 +121,6 @@ class Analytics
      */
     public function initialize()
     {
-
         // Creates and returns the Analytics service object.
 
         // Load the Google API PHP Client Library.

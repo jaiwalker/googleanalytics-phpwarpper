@@ -21,11 +21,11 @@ class config
      */
     public function __construct()
     {
-         // Only for Codeigniter //
-        $this->_ci =& get_instance();
-        log_message('debug', 'Google Api Class Initialized');
-        $this->_ci->config->load(self::ANALYTICS_CONFIG_FILE); // load config file
-        // Only for CodeIgniter ///
+         // Only for Codeigniter // -- Un Comment Below lines for codeigniter
+       // $this->_ci =& get_instance();
+        //log_message('debug', 'Google Api Class Initialized');
+       // $this->_ci->config->load(self::ANALYTICS_CONFIG_FILE); // load config file
+
 
         $this->key_file_location     = $this->_ci->config->item('key_file_location');
         $this->service_account_email = $this->_ci->config->item('service_account_email');
