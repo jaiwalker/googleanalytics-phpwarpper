@@ -2,14 +2,19 @@
 
 namespace Jaiwalker\Googlgeanalyticsapi;
 
+use Google_Auth_AssertionCredentials;
 use Google_Client;
+use Google_Service_Analytics;
 
 /**
+ * @property  key_file_location
  * @author  JaiKora <kora.jayaram@gmail.com>
  * @github  -  https://github.com/jaiwalker
  */
 class Analytics
 {
+
+
     /**
      * @var \CI_Controller
      */
@@ -69,26 +74,50 @@ class Analytics
     /**
      * @var bool
      */
-    protected $debug = true;
-    protected $outputType;
 
+    protected $debug = true;
+    /**
+     * @var
+     */
+    protected $outputType;
+    /**
+     * @var
+     */
+    protected $key_file_location;
+    /**
+     * @var
+     */
+    protected $application_name;
+    /**
+     * @var
+     */
+    protected $service_account_email;
+
+   protected $config;
 
     /**
      * Analytics constructor.
      *
      * @internal param $_ci
+     *
+     * @throws \Jaiwalker\Googlgeanalyticsapi\GoolgleExceptions
      */
     public function __construct()
     {
-        $this->_ci =& get_instance();
-        log_message('debug', 'Google Api Class Initialized');
+
+        $this->config = new config();
+        $this->key_file_location     = $this->config->key_file_location;
+        $this->service_account_email = $this->config->service_account_email;
+        $this->application_name      = $this->config->application_name;
 
         $this->initialize();
         // $this->getFirstprofileId();
+
     }
 
     /**
      * @return $this
+     * @throws \Jaiwalker\Googlgeanalyticsapi\GoolgleExceptions
      */
     public function initialize()
     {
@@ -99,19 +128,19 @@ class Analytics
 
         // Use the developers console and replace the values with your
         // service account email, and relative location of your key file.
-
-
         // Create and configure a new client object.
         $client = new Google_Client();
-        $client->setApplicationName("My Project");
+        $client->setApplicationName($this->application_name);
         $analytics = new Google_Service_Analytics($client);
 
         // Read the generated client_secrets.p12 key.
-        $key  = file_get_contents($key_file_location);
-        $cred = new Google_Auth_AssertionCredentials($service_account_email, array(Google_Service_Analytics::ANALYTICS_READONLY), $key);
+        $key  = file_get_contents($this->key_file_location);
+        $cred = new Google_Auth_AssertionCredentials($this->service_account_email, array(Google_Service_Analytics::ANALYTICS_READONLY), $key);
         $client->setAssertionCredentials($cred);
         if ($client->getAuth()->isAccessTokenExpired()) {
             $client->getAuth()->refreshTokenWithAssertion($cred);
+        } else {
+            throw new GoolgleExceptions("Access Token Expried");
         }
 
         $this->analytics = $analytics;
@@ -125,7 +154,7 @@ class Analytics
      * todo: validate Given profile id  set it up
      *
      * @return $this
-     * @throws \Exception
+     * @throws \Jaiwalker\Googlgeanalyticsapi\GoolgleExceptions
      */
     function getFirstprofileId($profileid = null)
     {
@@ -158,13 +187,13 @@ class Analytics
                     // return
 
                 } else {
-                    throw new Exception('No views (profiles) found for this user.');
+                    throw new GoolgleExceptions('No views (profiles) found for this user.');
                 }
             } else {
-                throw new Exception('No properties found for this user.');
+                throw new GoolgleExceptions('No properties found for this user.');
             }
         } else {
-            throw new Exception('No accounts found for this user.');
+            throw new GoolgleExceptions('No accounts found for this user.');
         }
     }
 
@@ -243,6 +272,9 @@ class Analytics
          return $this;
     }
 
+    /**
+     * @return mixed
+     */
     public function raw()
     {
         $results = $this->_build();
@@ -260,7 +292,8 @@ class Analytics
     {
         $results = $this->_build();
 
-        $data = new stdClass();
+        $data = new \stdClass();
+        $data->headers = $results->getColumnHeaders();
         $data->rows = $results->getRows();
         $data->sampledate = $results->getContainsSampledData();
         $data->selflink = $results->getSelfLink();
@@ -396,6 +429,7 @@ class Analytics
      */
     protected function _build()
     {
+
         if (!$this->startDate) {
             $this->startDate = $this->_parse_time('1 month ago');
         }
@@ -427,7 +461,6 @@ class Analytics
                 'filters'     => $filter,
                 'max-results' => $max,
         );
-
         if($this->outputType){
                 $optParams['output'] = $this->outputType;
         }
@@ -456,7 +489,7 @@ class Analytics
     function _ga_prefix($string)
     {
         if ($string[2] != ':') {
-            return 'ga:' . $string;
+            return 'ga:'  . $string;
         }
 
         return $string;
@@ -477,8 +510,7 @@ class Analytics
      */
     function filter($dim_or_met, $filter_comparison, $filter_value)
     {
-        $this->filters = $this->_ga_prefix($dim_or_met) . urlencode($filter_comparison . $filter_value);
-
+        $this->filters = $this->_ga_prefix($dim_or_met) .$filter_comparison . $filter_value;
         return $this;
     }
     
@@ -583,7 +615,6 @@ class Analytics
         }
     }
 
-
     /**
      * @param $array
      *
@@ -598,9 +629,6 @@ class Analytics
 
         return $object;
     }
-
-
-
 
 
     // --------------------------------------------------------------------
@@ -621,9 +649,6 @@ class Analytics
     }
 
 
-
-
-
     // --------------------------------------------------------------------
     /**
      * segment function.
@@ -642,4 +667,41 @@ class Analytics
     }
 
 
+}
+
+//
+/**
+ * @author JaiKora <kora.jayaram@gmail.com>
+ * @gihub  -  https://github.com/jaiwalker
+ */
+class GoolgleExceptions extends \Exception
+{
+    /**
+     * @param string $message
+     * @param int    $code
+     */
+    public function __construct($message, $code = 0)
+    {
+        // some code
+
+        // make sure everything is assigned properly
+        parent::__construct($message, $code);
+    }
+
+    // custom string representation of object
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return __CLASS__ . ": [{$this->code}]: {$this->message}\n";
+    }
+
+    /**
+     * @return void
+     */
+    public function customFunction()
+    {
+        echo "A custom function for this type of exception\n";
+    }
 }
