@@ -1,6 +1,6 @@
 <?php
 
-namespace Jaiwalker\Googlgeanalyticsapi;
+namespace Jaiwalker\Googleanalyticsapi;
 
 use Google_Auth_AssertionCredentials;
 use Google_Client;

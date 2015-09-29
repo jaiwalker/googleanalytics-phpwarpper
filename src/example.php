@@ -1,6 +1,6 @@
 <?php
 
-namespace Jaiwalker\Googlgeanalyticsapi;
+namespace Jaiwalker\Googleanalyticsapi;
 
 /**
  * @author JaiKora <kora.jayaram@gmail.com>

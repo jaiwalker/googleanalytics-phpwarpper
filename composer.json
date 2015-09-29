@@ -2,7 +2,7 @@
     "name": "jaiwalker/google-analyticsphpwarpper",
     "type": "Extension",
     "description": "A Nice Warpper to Google Analytics API Query ",
-    "keywords": ["codeignite","Google Analytics","Extensions"],
+    "keywords": ["codeigniter","Google Analytics","php Extensions"],
     "license": "MIT",
     "authors": [
         {
@@ -21,6 +21,7 @@
         "psr-4" : {
             "Jaiwalker\\Googleanalyticsapi\\": "/src"
         }
-    }
+    },
+     "minimum-stability": "stable"
 
 }
